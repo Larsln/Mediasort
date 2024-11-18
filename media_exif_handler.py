@@ -64,6 +64,7 @@ class MediaExifHandler:
     @staticmethod
     def get_metadata(file_path):
         metadata = MediaExifHandler.__extract_metadata(file_path)
+        #print(metadata)
         data = {"GPSCoordinates": list,
                 "Make": str,
                 "Model": str,

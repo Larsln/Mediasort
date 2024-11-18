@@ -1,12 +1,10 @@
 import os
-from importlib.metadata import metadata
-
-import media_exif_handler
+from datetime import datetime
 import re
-
 from media_exif_handler import MediaExifHandler
 
-
+count = 1100
+default_output_path = './output'
 def get_subfolder_names(directory):
     # Liste aller Unterordner ohne den Root-Pfad
     subfolder_names = [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
@@ -29,6 +27,38 @@ def get_coordinates(files, dir_path):
 
     return metadata["GPSCoordinates"]
 
+def get_date_object(file_metadata):
+    return datetime.strptime(file_metadata['CreateDate'], "%Y:%m:%d %H:%M:%S")
+
+def get_new_filename(file):
+    global count
+
+    file_metadata = MediaExifHandler.get_metadata(file)
+    _, file_extension = os.path.splitext(file)
+    date = get_date_object(file_metadata).strftime("%Y_%m_%d")
+
+    if file_metadata['Model']:
+        model = (file_metadata['Model']).replace(' ', '-')
+    else:
+        model = 'No-Device-Info'
+    print(date)
+    new_filename = date + "_" + model + "_" + str(count).zfill(6) + file_extension
+
+    count += 1
+
+    return new_filename
+def get_output_path(file):
+    file_metadata = MediaExifHandler.get_metadata(file)
+    location = 'Thailand'
+    date = get_date_object(file_metadata).strftime("%Y")
+    path = os.path.join(default_output_path, location, date)
+    path += '/'
+    print(path)
+    if not os.path.exists(path):
+        os.makedirs(path)  # Creates the directory (and parent directories if needed)
+        print(f"Created directory: {path}")
+    return path
+
 
 print(get_coordinates(os.listdir('./input/test'), './input/test'))
 source_folder = './input'
@@ -42,7 +72,10 @@ for subfolder in subfolders:
         file = os.path.join(source_folder, subfolder, file)
         if os.path.isfile(file):
             #TODO
-            MediaExifHandler.set_gps_coordinates(file, 10.5, 10, 10)
+            #MediaExifHandler.set_gps_coordinates(file, 10.5, 10, 10)
+            get_new_filename(file)
+            get_output_path(file)
+            os.rename(file, (get_output_path(file) + get_new_filename(file)))
 
 
 
