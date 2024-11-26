@@ -1,9 +1,10 @@
 from fractions import Fraction
 
+
 class CoordinatesCalculation:
 
     @staticmethod
-    def __deg_to_dms(decimal_coordinate, cardinal_directions):
+    def __dd_to_dms(decimal_coordinate, cardinal_directions):
         """
         This function converts decimal coordinates into the DMS (degrees, minutes and seconds) format.
         It also determines the cardinal direction of the coordinates.
@@ -13,7 +14,7 @@ class CoordinatesCalculation:
         :return: degrees, minutes, seconds and compass_direction
         :rtype: int, int, float, string
         """
-        if decimal_coordinate < 0:
+        if decimal_coordinate <= 0:
             compass_direction = cardinal_directions[1]
         elif decimal_coordinate > 0:
             compass_direction = cardinal_directions[0]
@@ -44,7 +45,6 @@ class CoordinatesCalculation:
         )
         return exif_format
 
-
     @staticmethod
     def deg_to_exif_dms(decimal_coordinate, cardinal_directions):
         """
@@ -56,7 +56,7 @@ class CoordinatesCalculation:
         :return: EXIF values for the provided DMS values
         :rtype: nested tuple
         """
-        dms = CoordinatesCalculation.__deg_to_dms(decimal_coordinate, cardinal_directions)
+        dms = CoordinatesCalculation.__dd_to_dms(decimal_coordinate, cardinal_directions)
         exif_format = CoordinatesCalculation.__dms_to_exif_format(dms[0], dms[1], dms[2])
         return exif_format, dms[3]
 
@@ -78,7 +78,7 @@ class CoordinatesCalculation:
         return decimal_coordinate
 
     @staticmethod
-    def deg_with_car_dir_to_deg(decimal_coordinate, cardinal_direction):
+    def dd_with_car_dir_to_dd(decimal_coordinate, cardinal_direction):
         """
         This function converts decimal coordinates with cardinal direction into decimal coordinates.
 
@@ -91,4 +91,17 @@ class CoordinatesCalculation:
             decimal_coordinate = -decimal_coordinate
         return decimal_coordinate
 
-#print(CoordinatesCalculation.deg_to_exif_dms(40.1881, ["N", "S"]))
+    @staticmethod
+    def dd_to_dd_with_car_dir(decimal_coordinate: float, cardinal_directions):
+
+        if decimal_coordinate <= 0:
+            direction = cardinal_directions[0]
+            decimal_coordinate = abs(decimal_coordinate)
+
+        elif decimal_coordinate > 0:
+            direction = cardinal_directions[1]
+
+        else:
+            raise ValueError("Coordinate is not in Range")
+
+        return decimal_coordinate, direction

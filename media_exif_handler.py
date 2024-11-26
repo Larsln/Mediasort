@@ -1,9 +1,25 @@
+import re
+from datetime import datetime
+
 import exiftool
 
 from coordinates_calculation import CoordinatesCalculation
 
 
 class MediaExifHandler:
+    supported_photo_files = ('.jpg', '.jpeg', '.png', '.heic')
+    supported_video_files = ('.mp4', '.mov')
+
+    @staticmethod
+    def check_coordinates(file_path):
+        metadata = MediaExifHandler.get_metadata(file_path)
+        if len(metadata['GPSCoordinates']) < 2:
+            return False
+        else:
+            return True
+    @staticmethod
+    def get_date_object(raw_date, date_format):
+        return datetime.strptime(raw_date, date_format)
 
     @staticmethod
     def __check_file_type(file_path):
@@ -19,7 +35,6 @@ class MediaExifHandler:
     @staticmethod
     def set_gps_coordinates(file_path, latitude, longitude, altitude):
 
-
         with exiftool.ExifTool() as et:
             try:
 
@@ -28,25 +43,26 @@ class MediaExifHandler:
                     command = [
 
                         f'-Keys:GPSCoordinates={latitude} {longitude} {altitude}',
+                        '-overwrite_original',
                         file_path
                     ]
                 else:
 
-                    latitude = CoordinatesCalculation.deg_to_exif_dms(latitude, ["N", "S"])
-                    longitude = CoordinatesCalculation.deg_to_exif_dms(longitude, ["E", "W"])
-                    altitude = CoordinatesCalculation.deg_to_exif_dms(altitude, ["0", "1"])
+                    latitude_dd_with_car_dir, latitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(latitude, ["S", "N"])
+                    longitude_dd_with_car_dir, longitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(longitude, ["W", "E"])
+                    altitude_dd_with_car_dir, altitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(altitude, ["1", "0"])
 
                     command = [
 
-                        f'-EXIF:GPSLatitude={latitude[0]}',  # Set EXIF GPS Latitude
-                        f'-EXIF:GPSLatitudeRef={latitude[1]}',  # Set EXIF GPS Latitude Reference (N or S)
-                        f'-EXIF:GPSLongitude={longitude[0]}',  # Set EXIF GPS Longitude
-                        f'-EXIF:GPSLongitudeRef={longitude[1]}',  # Set EXIF GPS Longitude Reference (E or W)
-                        f'-EXIF:GPSAltitude={altitude[0]}',  # Set EXIF GPS Altitude
-                        f'-EXIF:GPSAltitudeRef={altitude[1]}',  # Set EXIF GPS Altitude Reference (0 or 1)
-                        file_path  # Specify the file to modify
+                        f'-EXIF:GPSLatitude={latitude_dd_with_car_dir}',
+                        f'-EXIF:GPSLatitudeRef={latitude_car_dir}',
+                        f'-EXIF:GPSLongitude={longitude_dd_with_car_dir}',
+                        f'-EXIF:GPSLongitudeRef={longitude_car_dir}',
+                        f'-EXIF:GPSAltitude={altitude_dd_with_car_dir}',
+                        f'-EXIF:GPSAltitudeRef={altitude_car_dir}',
+                        '-overwrite_original',
+                        file_path
                     ]
-                # Execute the ExifTool command to modify the file
                 et.execute(*command)
 
                 print("GPS coordinates successfully set!")
@@ -57,53 +73,52 @@ class MediaExifHandler:
     @staticmethod
     def __extract_metadata(file_path):
         with exiftool.ExifTool() as et:
-            # Execute ExifTool and get metadata as a dictionary
-            metadata = et.execute_json(file_path)
+            metadata = et.execute_json('-ExtractEmbedded', file_path)
             return metadata[0]
 
     @staticmethod
     def get_metadata(file_path):
         metadata = MediaExifHandler.__extract_metadata(file_path)
-        #print(metadata)
         data = {"GPSCoordinates": list,
                 "Make": str,
                 "Model": str,
-                "CreateDate": str,}
+                "CreateDate": str}
         if MediaExifHandler.__check_file_type(file_path):
             try:
-                data["GPSCoordinates"] = [float(value) for value in metadata["Keys:GPSCoordinates"].split()]
+                if "QuickTime:GPSCoordinates" in metadata:
+                    data["GPSCoordinates"] = [float(value) for value in metadata["QuickTime:GPSCoordinates"].split()]
+                elif "QuickTime:LocationInformation" in metadata:
+                    pattern = r"Lat=([-+]?[0-9]*\.?[0-9]+)\s+Lon=([-+]?[0-9]*\.?[0-9]+)\s+Alt=([-+]?[0-9]*\.?[0-9]+)"
+                    match = re.search(pattern, metadata["QuickTime:LocationInformation"])
+                    data["GPSCoordinates"] = [float(match.group(1)), float(match.group(2)), float(match.group(3))] if match else []
+                else:
+                    data["GPSCoordinates"] = []
             except KeyError:
                 data["GPSCoordinates"] = []
-            data["Make"] = metadata.get("QuickTime:Make","")
-            data["Model"] = metadata.get("QuickTime:Model","")
-            data["CreateDate"] = metadata.get("QuickTime:CreateDate","")
+            data["Make"] = metadata.get("QuickTime:Make", "")
+            data["Model"] = metadata.get("QuickTime:Model", "")
+            raw_date = metadata.get("QuickTime:CreateDate", "")
+            data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S")
 
         else:
             try:
-                data["GPSCoordinates"] = [CoordinatesCalculation.deg_with_car_dir_to_deg(metadata["EXIF:GPSLatitude"],metadata["EXIF:GPSLatitudeRef"]),
-                                            CoordinatesCalculation.deg_with_car_dir_to_deg(metadata["EXIF:GPSLongitude"],metadata["EXIF:GPSLongitudeRef"])]
+                data["GPSCoordinates"] = [CoordinatesCalculation.dd_with_car_dir_to_dd(metadata["EXIF:GPSLatitude"],
+                                                                                       metadata[
+                                                                                             "EXIF:GPSLatitudeRef"]),
+                                          CoordinatesCalculation.dd_with_car_dir_to_dd(metadata["EXIF:GPSLongitude"],
+                                                                                       metadata[
+                                                                                             "EXIF:GPSLongitudeRef"])]
                 try:
                     data["GPSCoordinates"].append(
-                        CoordinatesCalculation.deg_with_car_dir_to_deg(metadata["EXIF:GPSAltitude"],
-                                                                       metadata["EXIF:GPSAltitudeRef"]))
+                        CoordinatesCalculation.dd_with_car_dir_to_dd(metadata["EXIF:GPSAltitude"],
+                                                                     metadata["EXIF:GPSAltitudeRef"]))
                 except KeyError:
                     pass
             except KeyError:
                 data["GPSCoordinates"] = []
 
             data["Make"] = metadata.get("EXIF:Make", "")
-            data["Model"] = metadata.get("EXIF:Model","")
-            data["CreateDate"] = metadata.get("EXIF:CreateDate","")
-
+            data["Model"] = metadata.get("EXIF:Model", "")
+            raw_date = data["CreateDate"] = metadata.get("File:FileCreateDate", "")
+            data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S%z")
         return data
-
-# Example usage
-#file_path = "./input/img.jpg"
-#latitude = 40.1881
-#longitude = 19.5996
-#altitude = 909.174
-#lon_ref = "W"  # W for West, E for East
-#lat_ref = "N"  # N for North, S for South
-#print(MediaExifHandler.extract_metadata("input/test/test.mp4"))
-
-#set_gps_coordinates_as_exif(file_path, latitude, longitude, lat_ref, lon_ref, altitude, 0)

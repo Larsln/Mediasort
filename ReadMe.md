@@ -1,8 +1,4 @@
-<h3>TODO:</h3>
-<ul>
-<li>Herausfinden ob Altitude required ist</li>
-<li>Main erweitern, sodass File coordinaten gesetzt wird</li>
-<li>Files umbenennen</li>
-<li>Files in Output verschieben</li>
-<li>Für Dateiname Land heraussuchen</li>
-</ul>
+<h1>Mediasort</h1>
+
+<ul><li>select Folder in main.py</li>
+<li>add reference.txt file to all subfolders with Photos (should contain GPS-Coordinates in DD [lat, long, alt(optional)]</li></ul>
