@@ -7,12 +7,12 @@ from coordinates_calculation import CoordinatesCalculation
 
 
 class MediaExifHandler:
-    SUPPORTED_PHOTO_FILES = ('.jpg', '.jpeg', '.png', '.heic')
+    SUPPORTED_PHOTO_FILES = ('.jpg', '.jpeg', '.png', '.heic', '.dng')
     SUPPORTED_VIDEO_FILES = ('.mp4', '.mov')
 
     @staticmethod
     def __extract_metadata(media_metadata):
-        with exiftool.ExifTool() as et:
+        with exiftool.ExifTool(encoding='utf-8') as et:
             metadata = et.execute_json('-ExtractEmbedded', media_metadata.get_full_file_path())
             return metadata[0]
 
@@ -82,7 +82,11 @@ class MediaExifHandler:
             data["Make"] = metadata.get("QuickTime:Make", "")
             data["Model"] = metadata.get("QuickTime:Model", "")
             raw_date = metadata.get("QuickTime:CreateDate", "")
-            data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S")
+            if not raw_date or raw_date == "0000:00:00 00:00:00":
+                raw_date = metadata.get("File:FileModifyDate", "")
+                data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S%z")
+            else:
+                data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S")
 
         else:
             try:
@@ -100,11 +104,16 @@ class MediaExifHandler:
                     pass
             except KeyError:
                 data["GPSCoordinates"] = []
-
+            print(metadata)
             data["Make"] = metadata.get("EXIF:Make", "")
             data["Model"] = metadata.get("EXIF:Model", "")
-            raw_date = metadata.get("EXIF:DateTimeOriginal", "")
-            data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S")
+            if metadata.get("EXIF:DateTimeOriginal", ""):
+                raw_date = metadata["EXIF:DateTimeOriginal"]
+                data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S")
+
+            elif metadata.get("File:FileModifyDate", ""):
+                raw_date = metadata.get("File:FileModifyDate", "")
+                data["CreateDate"] = MediaExifHandler.get_date_object(raw_date, "%Y:%m:%d %H:%M:%S%z")
         return data
 
     @staticmethod

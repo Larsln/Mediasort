@@ -11,7 +11,7 @@ from static_data_loader import StaticDataLoader
 
 def get_coordinates(reference_object: Metadata):
     files = os.listdir(reference_object.source_folder_path)
-    pattern = r'^reference\.(png|jpeg|jpg|heic|mp4|mov|txt)$'
+    pattern = r'^reference\.(png|jpeg|jpg|heic|dng|mp4|mov|txt)$'
     reference_files = [file for file in files if re.match(pattern, file, re.IGNORECASE)]
     if len(reference_files) < 1:
         return False
@@ -97,23 +97,35 @@ def check_only_reference_txt(directory):
 
 
 def folder_crawler(source_folder, function_used):
-    files = os.listdir(source_folder)
+    # Sicherstellen, dass der Quellordner existiert
+    if not os.path.isdir(source_folder):
+        raise ValueError(f"Source folder '{source_folder}' does not exist or is not a directory.")
+
+    # Liste der Dateien im aktuellen Ordner
+    files = [file for file in os.listdir(source_folder) if os.path.isfile(os.path.join(source_folder, file))]
     reference = Metadata()
     reference.source_folder_path = source_folder
+
     for file in files:
-        media_metadata = MediaMetadata(file, source_folder)
+        try:
+            media_metadata = MediaMetadata(file, source_folder)
 
-        if os.path.isfile(media_metadata.get_full_file_path()) and media_metadata.file_path.lower().endswith(
-                MediaExifHandler.SUPPORTED_PHOTO_FILES +
-                MediaExifHandler.SUPPORTED_VIDEO_FILES):
-            media_metadata.set_metadata()
-            function_used(media_metadata, reference)
+            if media_metadata.file_path.lower().endswith(
+                    MediaExifHandler.SUPPORTED_PHOTO_FILES +
+                    MediaExifHandler.SUPPORTED_VIDEO_FILES):
+                media_metadata.set_metadata()
+                function_used(media_metadata, reference)
+        except TypeError as e:
+            print(f"Skipping file '{file}': {e}")
+            continue
 
-    # Rekursion: Verarbeite alle Subfolder
-    subfolders = get_subfolder_names(source_folder)
+    # Rekursion: Verarbeite alle Unterordner
+    subfolders = [d for d in os.listdir(source_folder) if os.path.isdir(os.path.join(source_folder, d))]
     for subfolder in subfolders:
         subfolder_path = os.path.join(source_folder, subfolder)
         folder_crawler(subfolder_path, function_used)
+
+        # Entferne leere Unterordner oder Unterordner mit nur `reference.txt`
         try:
             os.rmdir(subfolder_path)
         except OSError:

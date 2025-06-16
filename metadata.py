@@ -21,7 +21,7 @@ class Metadata:
             return False
 
         else:
-            raise TypeError("The file is not a supported video file. [jpg, jpeg, png, heic, mp4, mov]")
+            raise TypeError("The file is not a supported file. [jpg, jpeg, png, heic, mp4, mov]")
 
     def get_gps_coordinates(self):
         if self.gps_coordinates:
