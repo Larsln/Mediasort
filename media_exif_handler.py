@@ -22,7 +22,7 @@ class MediaExifHandler:
         with exiftool.ExifTool() as et:
             try:
 
-                if media_metadata.is_video:
+                if media_metadata.video:
 
                     command = [
 
@@ -66,7 +66,7 @@ class MediaExifHandler:
                 "Make": str,
                 "Model": str,
                 "CreateDate": str}
-        if media_metadata.is_video:
+        if media_metadata.video:
             try:
                 if "QuickTime:GPSCoordinates" in metadata:
                     data["GPSCoordinates"] = [float(value) for value in metadata["QuickTime:GPSCoordinates"].split()]

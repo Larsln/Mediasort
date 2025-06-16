@@ -9,11 +9,8 @@ from static_data_loader import StaticDataLoader
 
 class Sorter:
 
-    def __init__(self):
+    def __init__(self, static_data_loader):
         self.static_data_loader = StaticDataLoader()
-        self.input_path = self.static_data_loader.input_path
-
-
 
     def sort_files(self, media_metadata, reference):
         self.get_coordinates(reference)
@@ -25,11 +22,12 @@ class Sorter:
                 if media_metadata.set_reference(reference):
                     MediaExifHandler.set_gps_coordinates(media_metadata)
                     self.move_file(media_metadata)
+        if media_metadata.live_photo is None:
+            self.static_data_loader.increase_counter()
 
     def move_file(self, media_metadata):
         os.rename(media_metadata.get_full_file_path(),
                   (self.get_output_path(media_metadata) + self.get_new_filename(media_metadata)))
-        self.static_data_loader.increase_counter()
 
     def get_output_path(self, media_metadata):
         locator = Locator()

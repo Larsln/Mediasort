@@ -1,5 +1,7 @@
 from sorter import Sorter
 from folder_crawler import FolderCrawler
+from static_data_loader import StaticDataLoader
 
-sorter = Sorter()
-FolderCrawler.crawl(sorter.input_path, sorter.sort_files)
+staticDataLoader = StaticDataLoader()
+folderCrawler = FolderCrawler(staticDataLoader)
+folderCrawler.crawl(StaticDataLoader.input_path)
