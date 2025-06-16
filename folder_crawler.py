@@ -40,6 +40,14 @@ class FolderCrawler:
             # Entferne leere Unterordner oder Unterordner mit nur `reference.txt`
             FolderCrawler.delete_empty_folders(subfolder_path)
 
+    def has_matching_file(file, file_list):
+        base, _ = os.path.splitext(file)  # Basename extrahieren
+        for other_file in file_list:
+            if other_file != file and os.path.splitext(other_file)[0] == base:
+                return True
+        return False
+
+
     @staticmethod
     def check_live_photos(directory):
         pass
