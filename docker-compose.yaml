@@ -1,0 +1,19 @@
+services:
+  mediasort:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ${INPUT_PATH}:/app/input
+      - ${OUTPUT_PATH}:/app/output
+      - data:/app/data
+
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    working_dir: /app
+    command: python main.py
+
+volumes:
+  data:
