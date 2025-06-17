@@ -1,4 +1,5 @@
 import os
+from logger_config import logger
 from metadata import Metadata
 from media_metadata import MediaMetadata
 from media_exif_handler import MediaExifHandler
@@ -20,23 +21,25 @@ class FolderCrawler:
         reference = Metadata()
         reference.source_folder_path = source_folder
         for file in files:
-
+            logger.info(f"Processing file: {file}")
             matching_file = FolderCrawler.has_matching_file(file, files)
 
             try:
                 media_metadata = MediaMetadata(file, source_folder, matching_file)
                 self.process_file(media_metadata, reference)
+                logger.info(f"Processed file: {media_metadata.file_path}")
 
             except TypeError as e:
-                print(f"Skipping file '{file}': {e}")
+                logger.warning(f"Skipping file '{file}': {e}")
                 continue
             try:
                 if media_metadata.live_photo:
                     media_metadata = MediaMetadata(matching_file, source_folder)
                     self.process_file(media_metadata, reference)
                     files.remove(matching_file)
+                    logger.info(f"Processed live photo: {media_metadata.file_path}")
             except TypeError as e:
-                print(f"Skipping file '{file}': {e}")
+                logger.warning(f"Skipping file '{file}': {e}")
                 continue
 
 
@@ -60,12 +63,12 @@ class FolderCrawler:
     @staticmethod
     def has_matching_file(file, file_list):
         base, ext = os.path.splitext(file)
-        # Entferne das Suffix '_HEVC', wenn es direkt vor dem Punkt steht
         base = base[:-5] if base.endswith('_HEVC') else base
         for other_file in file_list:
             other_base, other_ext = os.path.splitext(other_file)
             other_base = other_base[:-5] if other_base.endswith('_HEVC') else other_base
             if other_file != file and other_base == base:
+                logger.info(f"Found matching file for '{file}': '{other_file}'")
                 return other_file
         return None
 

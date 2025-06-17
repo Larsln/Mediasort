@@ -1,5 +1,4 @@
 import os
-
 from media_exif_handler import MediaExifHandler
 
 

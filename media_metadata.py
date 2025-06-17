@@ -22,7 +22,6 @@ class MediaMetadata(Metadata):
         return f"{super().__str__()}, MediaMetadata: {current_attrs}"
 
     def set_metadata(self):
-        print(self)
         data = MediaExifHandler.get_metadata(self)
         self.gps_coordinates = data["GPSCoordinates"]
         self.make = data["Make"]

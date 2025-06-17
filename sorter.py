@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-
+from logger_config import logger
 from media_exif_handler import MediaExifHandler
 from locator import Locator
 from metadata import Metadata
@@ -40,7 +40,7 @@ class Sorter:
         path = path.replace(" ", "_") + "/"
         if not os.path.exists(path):
             os.makedirs(path)  # Creates the directory (and parent directories if needed)
-            print(f"Created directory: {path}")
+            logger.info(f"Created directory: {path}")
         return path
 
     def get_new_filename(self, media_metadata):

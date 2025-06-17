@@ -1,9 +1,8 @@
 import re
-from datetime import datetime
-
 import exiftool
-
+from datetime import datetime
 from coordinates_calculation import CoordinatesCalculation
+from logger_config import logger
 
 
 class MediaExifHandler:
@@ -53,10 +52,10 @@ class MediaExifHandler:
                     ]
                 et.execute(*command)
 
-                print("GPS coordinates successfully set!")
+                logger.info("GPS coordinates successfully set!")
 
             except Exception as e:
-                print(f"An error occurred: {e}")
+                logger.error(f"Failed to set GPS coordinates: {e}")
 
 
     @staticmethod
@@ -104,7 +103,7 @@ class MediaExifHandler:
                     pass
             except KeyError:
                 data["GPSCoordinates"] = []
-            print(metadata)
+            logger.debug(f"{media_metadata.file_path} - {media_metadata}")
             data["Make"] = metadata.get("EXIF:Make", "")
             data["Model"] = metadata.get("EXIF:Model", "")
             if metadata.get("EXIF:DateTimeOriginal", ""):
