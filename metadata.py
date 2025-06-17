@@ -4,10 +4,11 @@ from media_exif_handler import MediaExifHandler
 
 
 class Metadata:
-    file_path: str = None
-    source_folder_path: str = None
-    gps_coordinates: list = None
-    is_video: bool = None
+    file_path: str | None = None
+    source_folder_path: str | None = None
+    gps_coordinates: list | None = None
+    live_photo: str | None = None
+    video: bool | None = None
 
     def __str__(self):
         base_attrs = ", ".join(f"{k}={v}" for k, v in vars(self).items())

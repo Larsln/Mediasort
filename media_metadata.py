@@ -10,10 +10,12 @@ class MediaMetadata(Metadata):
     model: str = None
     create_date: datetime = None
 
-    def __init__(self, file_path, source_folder_path):
+    def __init__(self, file_path, source_folder_path, matching_file=None):
         self.file_path = file_path
         self.source_folder_path = source_folder_path
-        self.is_video = self.check_is_video()
+        if matching_file is not None:
+            self.live_photo = matching_file
+        self.video = self.check_is_video()
 
     def __str__(self):
         current_attrs = ", ".join(f"{k}={v}" for k, v in vars(self).items())
