@@ -59,9 +59,13 @@ class FolderCrawler:
 
     @staticmethod
     def has_matching_file(file, file_list):
-        base, _ = os.path.splitext(file)
+        base, ext = os.path.splitext(file)
+        # Entferne das Suffix '_HEVC', wenn es direkt vor dem Punkt steht
+        base = base[:-5] if base.endswith('_HEVC') else base
         for other_file in file_list:
-            if other_file != file and os.path.splitext(other_file)[0] == base:
+            other_base, other_ext = os.path.splitext(other_file)
+            other_base = other_base[:-5] if other_base.endswith('_HEVC') else other_base
+            if other_file != file and other_base == base:
                 return other_file
         return None
 
