@@ -7,7 +7,7 @@ import os
 
 class StaticDataLoader:
     dotenv_path = '.env'
-    data_path: str
+    data_path = './data/data.json'
     only_sort: bool = False
     counter = 0
     input_path = './input'
@@ -15,13 +15,10 @@ class StaticDataLoader:
 
     def __init__(self):
         load_dotenv(self.dotenv_path)
-        self.data_path = os.getenv('DATA_PATH')
         if os.getenv('ONLY_SORT').lower() == 'false':
             self.only_sort = False
         else:
             self.only_sort = True
-        self.input_path = os.getenv('INPUT_PATH')
-        self.output_path = os.getenv('OUTPUT_PATH')
 
     def load_data(self):
         data = {'counter': self.counter}

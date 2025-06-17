@@ -1,4 +1,3 @@
-from sorter import Sorter
 from folder_crawler import FolderCrawler
 from static_data_loader import StaticDataLoader
 

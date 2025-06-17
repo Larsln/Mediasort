@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 
 from media_exif_handler import MediaExifHandler
 from locator import Locator
@@ -26,7 +27,7 @@ class Sorter:
             self.static_data_loader.increase_counter()
 
     def move_file(self, media_metadata):
-        os.rename(media_metadata.get_full_file_path(),
+        shutil.move(media_metadata.get_full_file_path(),
                   (self.get_output_path(media_metadata) + self.get_new_filename(media_metadata)))
 
     def get_output_path(self, media_metadata):
