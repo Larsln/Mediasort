@@ -41,6 +41,7 @@ class Sorter:
         if not os.path.exists(path):
             os.makedirs(path)  # Creates the directory (and parent directories if needed)
             logger.info(f"Created directory: {path}")
+            logger.info(f"Moving file to: {path}")
         return path
 
     def get_new_filename(self, media_metadata):
@@ -82,5 +83,6 @@ class Sorter:
             reference_object.gps_coordinates = tuple(numbers)
         else:
             reference_object.set_metadata()
+            reference_object.check_is_video()
 
-        reference_object.check_is_video()
+

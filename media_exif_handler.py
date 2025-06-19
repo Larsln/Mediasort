@@ -25,10 +25,9 @@ class MediaExifHandler:
 
                     command = [
 
-                        f'-Keys:GPSCoordinates={media_metadata.get_gps_coordinates()[0]}'
-                        f'{media_metadata.get_gps_coordinates()[1]} {media_metadata.get_gps_coordinates()[2]}',
+                        f'-QuickTime:GPSCoordinates={media_metadata.get_gps_coordinates_as_string()}',
                         '-overwrite_original',
-                        media_metadata.get_full_file_path
+                        media_metadata.get_full_file_path()
                     ]
                 else:
 

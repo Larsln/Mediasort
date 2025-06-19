@@ -19,7 +19,6 @@ class Metadata:
 
         elif self.file_path.lower().endswith(MediaExifHandler.SUPPORTED_PHOTO_FILES):
             return False
-
         else:
             raise TypeError("The file is not a supported file. [jpg, jpeg, png, heic, mp4, mov]")
 
@@ -28,6 +27,14 @@ class Metadata:
             return self.gps_coordinates
         else:
             return []
+
+    def get_gps_coordinates_as_string(self):
+        if self.gps_coordinates:
+            print(f"{self.gps_coordinates[0]}, {self.gps_coordinates[1]}, {self.gps_coordinates[2]}")
+            return f"{self.gps_coordinates[0]} {self.gps_coordinates[1]} {self.gps_coordinates[2]}"
+        else:
+            print("GPS coordinates not set.")
+            return ""
 
     def set_metadata(self):
         data = MediaExifHandler.get_metadata(self)
