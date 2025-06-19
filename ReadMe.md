@@ -82,4 +82,4 @@ Country/Year/City/2025_03_03_DEVICE_SERIALNUMBER_SEQUENCE.extension
 ## 📝 Feedback & Issues
 
 If you encounter problems or have suggestions, please open an issue in the repository.
-```
+
