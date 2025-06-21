@@ -9,10 +9,12 @@ class MediaMetadata(Metadata):
     make: str = None
     model: str = None
     create_date: datetime = None
+    reference: Metadata = None
 
-    def __init__(self, file_path, source_folder_path, matching_file=None):
+    def __init__(self, file_path, source_folder_path, reference, matching_file=None):
         self.file_path = file_path
         self.source_folder_path = source_folder_path
+        self.reference = reference
         if matching_file is not None:
             self.live_photo = matching_file
         self.video = self.check_is_video()
@@ -28,27 +30,15 @@ class MediaMetadata(Metadata):
         self.model = data["Model"]
         self.create_date = data["CreateDate"]
 
-    def get_make(self):
-        if self.make:
-            return self.make
-        else:
-            return ""
-
-    def get_model(self):
-        if self.model:
-            return self.model
-        else:
-            return ""
+    def set_embedded_metadata(self):
+        if not self.gps_coordinates and self.reference:
+            pass
 
     def get_create_date(self, date_format):
-        if self.create_date:
-            return self.create_date.strftime(date_format)
-        else:
-            return ""
+        return self.create_date.strftime(date_format)
 
     def set_reference(self, reference):
         if reference.gps_coordinates:
             self.gps_coordinates = reference.gps_coordinates
-            return True
         else:
-            return False
+            raise TypeError("Reference does not have GPS coordinates.")

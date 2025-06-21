@@ -13,15 +13,15 @@ class Sorter:
     def __init__(self, static_data_loader):
         self.static_data_loader = StaticDataLoader()
 
-    def sort_files(self, media_metadata, reference):
-        self.get_coordinates(reference)
+    def sort_files(self, media_metadata):
+        self.get_coordinates(media_metadata.reference)
         if media_metadata.check_coordinates():
             self.move_file(media_metadata)
         else:
-            if not self.static_data_loader.only_sort and reference:
+            if not self.static_data_loader.only_sort and media_metadata.reference:
 
-                if media_metadata.set_reference(reference):
-                    MediaExifHandler.set_gps_coordinates(media_metadata)
+                if media_metadata.set_reference(media_metadata.reference):
+                    MediaExifHandler.set_exif_tags(media_metadata)
                     self.move_file(media_metadata)
         if media_metadata.live_photo is None:
             self.static_data_loader.increase_counter()

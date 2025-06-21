@@ -16,7 +16,7 @@ class MediaExifHandler:
             return metadata[0]
 
     @staticmethod
-    def set_gps_coordinates(media_metadata):
+    def set_exif_tags(media_metadata):
 
         with exiftool.ExifTool() as et:
             try:
@@ -32,11 +32,11 @@ class MediaExifHandler:
                 else:
 
                     latitude_dd_with_car_dir, latitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
-                        media_metadata.get_gps_coordinates()[0], ["S", "N"])
+                        media_metadata.gps_coordinates()[0], ["S", "N"])
                     longitude_dd_with_car_dir, longitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
-                        media_metadata.get_gps_coordinates()[1], ["W", "E"])
+                        media_metadata.gps_coordinates()[1], ["W", "E"])
                     altitude_dd_with_car_dir, altitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
-                        media_metadata.get_gps_coordinates()[2], ["1", "0"])
+                        media_metadata.gps_coordinates()[2], ["1", "0"])
 
                     command = [
 
@@ -55,7 +55,6 @@ class MediaExifHandler:
 
             except Exception as e:
                 logger.error(f"Failed to set GPS coordinates: {e}")
-
 
     @staticmethod
     def get_metadata(media_metadata):
