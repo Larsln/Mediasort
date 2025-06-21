@@ -23,22 +23,24 @@ class FolderCrawler:
         for file in files:
             logger.info(f"Processing file: {file}")
             matching_file = FolderCrawler.has_matching_file(file, files)
-
             try:
-                media_metadata = MediaMetadata(file, source_folder, matching_file, reference)
+                media_metadata = MediaMetadata(file, source_folder, reference, matching_file)
+                media_metadata.get_coordinates()
+
                 self.process_file(media_metadata)
                 logger.info(f"Processed file: {media_metadata.file_path}")
 
-            except TypeError as e:
+            except (TypeError, ValueError) as e:
+
                 logger.warning(f"Skipping file '{file}': {e}")
                 continue
             try:
                 if media_metadata.live_photo:
-                    media_metadata = MediaMetadata(matching_file, source_folder)
-                    self.process_file(media_metadata, reference)
+                    media_metadata = MediaMetadata(matching_file, source_folder, reference, media_metadata.file_path)
+                    self.process_file(media_metadata)
                     files.remove(matching_file)
                     logger.info(f"Processed live photo: {media_metadata.file_path}")
-            except TypeError as e:
+            except (TypeError, ValueError) as e:
                 logger.warning(f"Skipping file '{file}': {e}")
                 continue
 
@@ -71,10 +73,6 @@ class FolderCrawler:
         return None
 
     @staticmethod
-    def check_live_photos(directory):
-        pass
-
-    @staticmethod
     def get_subfolder_names(directory):
         try:
             # Gibt eine Liste aller Unterordner im Verzeichnis zurück
@@ -96,14 +94,3 @@ class FolderCrawler:
         files = os.listdir(directory)
         files = [file for file in files if os.path.isfile(os.path.join(directory, file))]
         return len(files) == 1 and files[0].lower() == 'reference.txt'
-
-
-'''    @staticmethod
-    def process_media_file(media_metadata, function_used):
-        if media_metadata.check_coordinates():
-            function_used(media_metadata)
-        else:
-            if not media_metadata.video and media_metadata.live_photo:
-                media_metadata.set_reference(media_metadata.live_photo)
-                MediaExifHandler.set_exif_tags(media_metadata)
-                function_used(media_metadata)'''
