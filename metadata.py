@@ -30,10 +30,8 @@ class Metadata:
 
     def get_gps_coordinates_as_string(self):
         if self.gps_coordinates:
-            print(f"{self.gps_coordinates[0]}, {self.gps_coordinates[1]}, {self.gps_coordinates[2]}")
             return f"{self.gps_coordinates[0]} {self.gps_coordinates[1]} {self.gps_coordinates[2]}"
         else:
-            print("GPS coordinates not set.")
             return ""
 
     def set_metadata(self):

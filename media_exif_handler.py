@@ -16,46 +16,51 @@ class MediaExifHandler:
             return metadata[0]
 
     @staticmethod
-    def set_gps_coordinates(media_metadata):
+    def set_exif_tags(media_metadata, gps, make):
 
         with exiftool.ExifTool() as et:
             try:
 
                 if media_metadata.video:
 
-                    command = [
+                    command = []
 
-                        f'-QuickTime:GPSCoordinates={media_metadata.get_gps_coordinates_as_string()}',
+                    if gps:
+                        command.append(f'-QuickTime:GPSCoordinates={media_metadata.get_gps_coordinates_as_string()}',)
+
+                    if make:
+                        command.append(f'-Make={media_metadata.make}')
+
+                    command.extend([
                         '-overwrite_original',
                         media_metadata.get_full_file_path()
-                    ]
+                    ])
                 else:
+                    if gps:
 
-                    latitude_dd_with_car_dir, latitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
-                        media_metadata.get_gps_coordinates()[0], ["S", "N"])
-                    longitude_dd_with_car_dir, longitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
-                        media_metadata.get_gps_coordinates()[1], ["W", "E"])
-                    altitude_dd_with_car_dir, altitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
-                        media_metadata.get_gps_coordinates()[2], ["1", "0"])
+                        latitude_dd_with_car_dir, latitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
+                            media_metadata.gps_coordinates[0], ["S", "N"])
+                        longitude_dd_with_car_dir, longitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
+                            media_metadata.gps_coordinates[1], ["W", "E"])
+                        altitude_dd_with_car_dir, altitude_car_dir = CoordinatesCalculation.dd_to_dd_with_car_dir(
+                            media_metadata.gps_coordinates[2], ["1", "0"])
 
-                    command = [
+                        command = [
 
-                        f'-EXIF:GPSLatitude={latitude_dd_with_car_dir}',
-                        f'-EXIF:GPSLatitudeRef={latitude_car_dir}',
-                        f'-EXIF:GPSLongitude={longitude_dd_with_car_dir}',
-                        f'-EXIF:GPSLongitudeRef={longitude_car_dir}',
-                        f'-EXIF:GPSAltitude={altitude_dd_with_car_dir}',
-                        f'-EXIF:GPSAltitudeRef={altitude_car_dir}',
-                        '-overwrite_original',
-                        media_metadata.get_full_file_path()
-                    ]
-                et.execute(*command)
-
-                logger.info("GPS coordinates successfully set!")
+                            f'-EXIF:GPSLatitude={latitude_dd_with_car_dir}',
+                            f'-EXIF:GPSLatitudeRef={latitude_car_dir}',
+                            f'-EXIF:GPSLongitude={longitude_dd_with_car_dir}',
+                            f'-EXIF:GPSLongitudeRef={longitude_car_dir}',
+                            f'-EXIF:GPSAltitude={altitude_dd_with_car_dir}',
+                            f'-EXIF:GPSAltitudeRef={altitude_car_dir}',
+                            '-overwrite_original',
+                            media_metadata.get_full_file_path()
+                        ]
+                        et.execute(*command)
+                        logger.info("GPS coordinates successfully set!")
 
             except Exception as e:
                 logger.error(f"Failed to set GPS coordinates: {e}")
-
 
     @staticmethod
     def get_metadata(media_metadata):
