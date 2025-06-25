@@ -56,8 +56,8 @@ class MediaExifHandler:
                             '-overwrite_original',
                             media_metadata.get_full_file_path()
                         ]
-                        et.execute(*command)
-                        logger.info("GPS coordinates successfully set!")
+                et.execute(*command)
+                logger.info("GPS coordinates successfully set!")
 
             except Exception as e:
                 logger.error(f"Failed to set GPS coordinates: {e}")
