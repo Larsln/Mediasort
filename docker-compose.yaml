@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    user: "${UID}:${GID}"
     volumes:
       - ${INPUT_PATH}:/app/input
       - ${OUTPUT_PATH}:/app/output
@@ -13,7 +14,7 @@ services:
     env_file:
       - .env
     working_dir: /app
-    command: python main.py
+    command: sh -c "umask 007 && python main.py"
 
 volumes:
   data:
