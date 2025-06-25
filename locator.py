@@ -14,5 +14,5 @@ class Locator:
         return _(location_data['country'])
 
     def get_city_name(self, decimal_coordinates):
-        location_data = reverse_geocode.get(decimal_coordinates, min_population=8000)
+        location_data = reverse_geocode.get(decimal_coordinates)
         return (location_data['city'])
